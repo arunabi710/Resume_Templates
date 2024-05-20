@@ -20,14 +20,8 @@ def process_pdf(file):
     # Process the temporary PDF file
     with open(temp_file_path, "rb") as fd:
         document = fd.read()
-    
-    try:
-        poller = document_analysis_client.begin_analyze_document(model_id, document)
-        result = poller.result()
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        os.unlink(temp_file_path)
-        return None
+    poller = document_analysis_client.begin_analyze_document(model_id, document)
+    result = poller.result()
 
     # Create Excel workbook and write data
     workbook = Workbook()
@@ -52,17 +46,16 @@ def process_pdf(file):
 
     return excel_file_path
 
-st.title('PDF to Excel Converter')
+st.title('Document Intelligence Tool')
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 if uploaded_file is not None:
     st.write('PDF file uploaded successfully.')
     st.write('Processing...')
     excel_file_path = process_pdf(uploaded_file)
-    if excel_file_path:
-        st.success('Excel file generated successfully!')
+    st.success('Excel file generated successfully!')
 
-        # Add a download button for the Excel file
-        with open(excel_file_path, "rb") as excel_file:
-            excel_bytes = excel_file.read()
-        st.download_button(label="Download Excel file", data=excel_bytes, file_name="extracted_data.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    # Add a download button for the Excel file
+    with open(excel_file_path, "rb") as excel_file:
+        excel_bytes = excel_file.read()
+    st.download_button(label="Download Excel file", data=excel_bytes, file_name="extracted_data.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
