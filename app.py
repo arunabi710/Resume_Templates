@@ -7,7 +7,7 @@ from openpyxl import Workbook
 
 # Azure Form Recognizer credentials
 endpoint = "https://document-i-testing.cognitiveservices.azure.com/"
-credential = AzureKeyCredential("fca7074b4c814fe3a6f6942fb873ff2b")
+credential = AzureKeyCredential("your-form-recognizer-api-key")
 document_analysis_client = DocumentAnalysisClient(endpoint, credential)
 model_id = "Rental-Agreement-Processing"
 
@@ -20,8 +20,14 @@ def process_pdf(file):
     # Process the temporary PDF file
     with open(temp_file_path, "rb") as fd:
         document = fd.read()
-    poller = document_analysis_client.begin_analyze_document(model_id, document)
-    result = poller.result()
+    
+    try:
+        poller = document_analysis_client.begin_analyze_document(model_id, document)
+        result = poller.result()
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        os.unlink(temp_file_path)
+        return None
 
     # Create Excel workbook and write data
     workbook = Workbook()
@@ -46,16 +52,17 @@ def process_pdf(file):
 
     return excel_file_path
 
-st.title('Document Intelligence Tool')
+st.title('PDF to Excel Converter')
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 if uploaded_file is not None:
     st.write('PDF file uploaded successfully.')
     st.write('Processing...')
     excel_file_path = process_pdf(uploaded_file)
-    st.success('Excel file generated successfully!')
+    if excel_file_path:
+        st.success('Excel file generated successfully!')
 
-    # Add a download button for the Excel file
-    with open(excel_file_path, "rb") as excel_file:
-        excel_bytes = excel_file.read()
-    st.download_button(label="Download Excel file", data=excel_bytes, file_name="extracted_data.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        # Add a download button for the Excel file
+        with open(excel_file_path, "rb") as excel_file:
+            excel_bytes = excel_file.read()
+        st.download_button(label="Download Excel file", data=excel_bytes, file_name="extracted_data.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
