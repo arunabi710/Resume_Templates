@@ -7,7 +7,7 @@ from openpyxl import Workbook
 
 # Azure Form Recognizer credentials
 endpoint = "https://document-i-testing.cognitiveservices.azure.com/"
-credential = AzureKeyCredential("your-form-recognizer-api-key")
+credential = AzureKeyCredential("fca7074b4c814fe3a6f6942fb873ff2b")
 document_analysis_client = DocumentAnalysisClient(endpoint, credential)
 model_id = "Rental-Agreement-Processing"
 
